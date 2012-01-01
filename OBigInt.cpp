@@ -30,19 +30,21 @@ BigInt::BigInt(int v)
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
-	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
+	uInt *th = (uInt*)words;
 	uLong carry = 0;
-	for (int i = 0; i < wc; i++)
+	for (	uInt *oz = (uInt*)rhs.words, *limit = oz + rhs.wc, *thl = th + wc;
+			oz < limit || carry && th < thl;
+			oz++, th++)
 	{
-		uLong t = carry + th[i];
-		t += i < rhs.wc ? oz[i] : 0;
-		if (t > MUL)
-		{
-			carry = 1;
-			t &= MUL;
-		}
-		else carry = 0;
-		th[i] = (uInt)t;
+			uLong t = carry + *th;
+			t += oz < limit ? *oz : 0;
+			if (t > MUL)
+			{
+				carry = 1;
+				t &= MUL;
+			}
+			else carry = 0;
+			*th = (uInt)t;
 	}
 	if (carry) {
 		int owc = wc;
@@ -55,11 +57,13 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 BigInt & BigInt::operator-=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
-	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
+	uInt *th = (uInt*)words;
 	uLong borrow = 0;
-	for (int i = 0; i < wc; i++)
+	for (	uInt *oz = (uInt*)rhs.words, *limit = oz + rhs.wc, *thl = th + wc;
+			oz < limit || borrow && th < thl;
+			oz++, th++)
 	{
-			uLong t = th[i], r = i < rhs.wc ? oz[i] : 0;
+			uLong t = *th, r = oz < limit ? *oz : 0;
 			if (borrow)
 			{
 				if (t <= r) t += MUL; /* leave borrow set to 1 */
@@ -73,9 +77,8 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 				borrow = 1;
 				t += SET;
 			}
-			
-			th[i] = (uInt)(t - r);
+
+			*th = (uInt)(t - r);
 	}
 	return *this;
 }
-
