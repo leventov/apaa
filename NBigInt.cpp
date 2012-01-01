@@ -44,7 +44,7 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 		carry = (sLong)carry < 0 ? 1 : 0;
 		++th, ++oz;
 	}
-	while (th < thl)
+	while (carry && th < thl)
 	{
 		carry += *th;
 		*th = carry;
@@ -77,7 +77,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 		borrow = (sLong)borrow < 0 ? -1LL : 0;  
 		th++; oz++;	// WTF? все так просто?
 	}
-	while (th < thl)
+	while (borrow && th < thl)
 	{
 		borrow += *th;
 		*th = borrow;

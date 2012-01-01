@@ -3,10 +3,14 @@
 
 #define uInt unsigned long long int
 #define INIT_SIZE 1
-#define FZ (uInt)0
+#define BIG_INT (uInt)2000000000
 
+#define STR_EXPAND(tok) #tok		// http://www.guyrutenberg.com/2008/12/20/
+#define STR(tok) STR_EXPAND(tok)	// expanding-macros-into-string-constants-in-c/
+#define _WS STR(__WS)
+#define __WS 8
 
-int BigInt::WS = sizeof(uInt);
+int BigInt::WS = __WS;
 
 BigInt::BigInt(int init_size, int v)
 {
@@ -27,84 +31,33 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	this->grow(rhs.wc);
 	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
 	int owc; // prevent cross initialization error
-	
-	/*				rev 1.0
-	asm goto (
-			"clc\n"
-			"l1:\t"
-			"mov\t(%[oz]), %[ax]\n\t"
-			"adc\t%[ax], (%[th])\n\t"
-			"lahf\n\t"
-			"add\t%[ws], %[th]\n\t"
-			"add\t%[ws], %[oz]\n\t"
-			"sahf\n\t"
-			"loop\tl1\n\t"
-			"jnc\t%l[nocarry]\n"
-			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ws] "I" (sizeof(uInt)), [ax] "a" (FZ), "c" (wc)
-			:
-			: nocarry
-	);
-	//*/
-	
-	/*				rev 1.1
-	asm goto (
-			"clc\n"
-			"l1:\t"
-			"mov\t(%[oz]), %[ax]\n\t"
-			"adc\t%[ax], (%[th])\n\t"
-			"lahf\n\t"
-			"add\t%[ws], %[th]\n\t"
-			"add\t%[ws], %[oz]\n\t"
-			"sahf\n\t"
-			"dec\t%[cx]\n\t"
-			"jnz\tl1\n\t"
-			"jnc\t%l[nocarry]\n"
-			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ws] "I" (sizeof(uInt)), [ax] "a" (FZ), [cx] "c" (wc)
-			:
-			: nocarry
-	);
-	//*/
 
-	/*				rev 2.0
+	//				rev 3.0
 	asm goto (
 			"clc\n"
-			"l1:\t"
+			"o1:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
 			"adc\t%[ax], (%[th])\n\t"
-			"lea\t4(%[th]), %[th]\n\t"
-			"lea\t4(%[oz]), %[oz]\n\t"
+			"lea\t" _WS "(%[th]), %[th]\n\t"
+			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			"dec\t%[cx]\n\t"
-			"jnz\tl1\n\t"
-			"jnc\t%l[nocarry]\n"
+			"jnz\to1\n\t"
+			"mov\t%[rem], %[cx]\n\t"
+			"jecxz\tb1\n"
+			"t1:\t"
+			"jnc\t%l[nocarry]\n\t"
+			"adc\t$0, (%[th])\n\t"
+			"lea\t" _WS "(%[th]), %[th]\n\t"
+			"dec\t%[cx]\n\t"
+			"jnz\tt1\n"
+			"b1:\t"
+			"jnc\t%l[nocarry]\n\t"
 			:
 			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (FZ), [cx] "c" (wc)
+			  [ax] "a" (BIG_INT), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: nocarry
 	);
-	//*/
-
-	//*				rev 2.1
-	asm goto (
-			"clc\n"
-			"l1:\t"
-			"mov\t(%[oz], %[off]), %[ax]\n\t"
-			"adc\t%[ax], (%[th], %[off])\n\t"
-			"lea\t8(%[off]), %[off]\n\t"
-			"dec\t%[cx]\n\t"
-			"jnz\tl1\n\t"
-			"jnc\t%l[nocarry]\n"
-			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (FZ), [cx] "c" (wc),  [off] "b" ((long long int)0)
-			:
-			: nocarry
-	);
-	//*/
 
 	owc = wc;
 	this->alloc(owc + 1);
@@ -115,75 +68,42 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 
 BigInt & BigInt::operator-=(const BigInt &rhs)
 {
+	this->grow(rhs.wc);
 	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
-
-	/*				rev 1.0
-	asm (
-			"clc\n"
-			"l2:\t"
-			"mov\t(%[oz]), %[ax]\n\t"
-			"sbb\t%[ax], (%[th])\n\t"
-			"lahf\n\t"
-			"add\t%[ws], %[th]\n\t"
-			"add\t%[ws], %[oz]\n\t"
-			"sahf\n\t"
-			"loop\tl2\n\t"
-			:
-			: [th] "r" (th), [oz] "r" (oz),
-			[ws] "I" (sizeof(uInt)), [ax] "a" (FZ), "c" (wc)
-	);
-	//*/
-
-	/*				rev 1.1
-	asm (
-			"clc\n"
-			"l2:\t"
-			"mov\t(%[oz]), %[ax]\n\t"
-			"sbb\t%[ax], (%[th])\n\t"
-			"lahf\n\t"
-			"add\t%[ws], %[th]\n\t"
-			"add\t%[ws], %[oz]\n\t"
-			"sahf\n\t"
-			"dec\t%[cx]\n\t"
-			"jnz\tl2\n\t"
-			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ws] "I" (sizeof(uInt)), [ax] "a" (FZ), [cx] "c" (wc)
-	);
-	//*/
 	
-	/*				rev 2.0
-	asm (
+	//				rev 3.0
+	asm goto (
 			"clc\n"
-			"l2:\t"
+			"o2:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
 			"sbb\t%[ax], (%[th])\n\t"
-			"lea\t4(%[th]), %[th]\n\t"
-			"lea\t4(%[oz]), %[oz]\n\t"
+			"lea\t" _WS "(%[th]), %[th]\n\t"
+			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			"dec\t%[cx]\n\t"
-			"jnz\tl2\n\t"
+			"jnz\to2\n\t"
+			"mov\t%[rem], %[cx]\n\t"
+			"jecxz\t%l[noborrow]\n"
+			"t2:\t"
+			"jnc\t%l[noborrow]\n\t"
+			"sbb\t$0, (%[th])\n\t"
+			"lea\t" _WS "(%[th]), %[th]\n\t"
+			"dec\t%[cx]\n\t"
+			"jnz\tt2\n\t"
 			:
 			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (FZ), [cx] "c" (wc)
-	);
-	//*/
-
-	//*				rev 2.1
-	asm (
-			"clc\n"
-			"l2:\t"
-			"mov\t(%[oz], %[off]), %[ax]\n\t"
-			"sbb\t%[ax], (%[th], %[off])\n\t"
-			"lea\t8(%[off]), %[off]\n\t"
-			"dec\t%[cx]\n\t"
-			"jnz\tl2\n\t"
+			  [ax] "a" (BIG_INT), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (FZ), [cx] "c" (wc), [off] "b" ((long long int)0)
-			: 
+			: noborrow
 	);
-	//*/
 	
-	return *this;
+	noborrow: return *this;
 }
+
+
+
+
+
+
+
+
 

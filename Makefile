@@ -1,7 +1,7 @@
 CXX = g++
-CXXFLAGS = -O1
+CXXFLAGS = -O2
 
-BIR = BigInt
+BIR = EABigInt
 
 main: main.o BI_c.o $(BIR).o
 	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt
