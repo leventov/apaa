@@ -10,7 +10,7 @@ int main1() {
 	BigInt *a = new BigInt(1);
 	BigInt *b = new BigInt(1);
 	BigInt * t;
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 40; i++)
 	{
 		*a += *b;
 		t = a;
@@ -18,7 +18,7 @@ int main1() {
 		b = t;
 		printf("%s %s\n", a->hex(), b->hex());
 	}
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 40; i++)
 	{
 		*b -= *a;
 		t = a;
@@ -49,7 +49,7 @@ int main2() {
 	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
 	return 0;
 }
-int TOTAL_ITERATIONS = 1000000;
+int TOTAL_ITERATIONS = 1024000;
 
 int main() {
     struct timespec t1, t2;
@@ -58,9 +58,9 @@ int main() {
     double rr[3];
     for (int k = 0; k <= 2; k++) {
 		
-		int s0 = 100 * (1 << k), s = s0 * is / BigInt::WS;
+		int s0 = 96 * (1 << k), s = s0 * is / BigInt::WS;
 		double TID = TOTAL_ITERATIONS * is / BigInt::WS *1.0L;
-		//printf("%d\n", s);
+		printf("%d\n", s);
 		int* words = (int*)calloc(2*s0, is);
 		for (int* t = words; t < words + 2*s0; t++) *t = rand();
 		BigInt *a = new BigInt(s, (void*)words);

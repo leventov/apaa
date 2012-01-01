@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include "BigInt.h"
 
-#define uInt unsigned long long int
+#define uInt unsigned int
 #define INIT_SIZE 1
 #define BIG_INT (uInt)2000000000
 
 #define STR_EXPAND(tok) #tok		// http://www.guyrutenberg.com/2008/12/20/
 #define STR(tok) STR_EXPAND(tok)	// expanding-macros-into-string-constants-in-c/
 #define _WS STR(__WS)
-#define __WS 8
+#define __WS 4
 
 int BigInt::WS = __WS;
 
@@ -38,8 +38,8 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"o1:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
 			"adc\t%[ax], (%[th])\n\t"
-			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"lea\t" _WS "(%[oz]), %[oz]\n\t"
+			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"dec\t%[cx]\n\t"
 			"jnz\to1\n\t"
 			"mov\t%[rem], %[cx]\n\t"
@@ -77,8 +77,8 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			"o2:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
 			"sbb\t%[ax], (%[th])\n\t"
-			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"lea\t" _WS "(%[oz]), %[oz]\n\t"
+			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"dec\t%[cx]\n\t"
 			"jnz\to2\n\t"
 			"mov\t%[rem], %[cx]\n\t"

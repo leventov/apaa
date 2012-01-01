@@ -32,20 +32,24 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	this->grow(rhs.wc);
 	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
 	int owc; // prevent cross initialization error
-	
+	// 1.5 cycles / limb
+	// same as 4-iteration unroll in GMP
 	asm goto (
 			"clc\n"
 			
 			"o1:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
-			"adc\t%[ax], (%[th])\n\t"
-			"mov\t8(%[oz]), %[ax]\n\t"
-			"adc\t%[ax], 8(%[th])\n\t"		
+			"mov\t8(%[oz]), %[bx]\n\t"
 			
-			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			
+			"adc\t%[ax], (%[th])\n\t"
+			"adc\t%[bx], 8(%[th])\n\t"	
+				
 			"dec\t%[cx]\n\t"
+			
+			"lea\t" _WS "(%[th]), %[th]\n\t"
+			
 			"jnz\to1\n\t"
 			
 			"mov\t%[rem], %[cx]\n\t"
@@ -60,13 +64,15 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			
 			"dec\t%[cx]\n\t"
+			
 			"jnz\tt1\n"
 			
 			"b1:\t"
 			"jnc\t%l[nocarry]\n\t"
 			:
 			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (BIG_INT), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
+			  [ax] "a" ((uInt)0), [bx] "b" ((uInt)0),
+			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: nocarry
 	);
@@ -88,14 +94,17 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			
 			"o2:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
-			"sbb\t%[ax], (%[th])\n\t"
-			"mov\t8(%[oz]), %[ax]\n\t"
-			"sbb\t%[ax], 8(%[th])\n\t"
+			"mov\t8(%[oz]), %[bx]\n\t"
 			
-			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			
+			"sbb\t%[ax], (%[th])\n\t"
+			"sbb\t%[bx], 8(%[th])\n\t"
+			
 			"dec\t%[cx]\n\t"
+			
+			"lea\t" _WS "(%[th]), %[th]\n\t"
+			
 			"jnz\to2\n\t"
 			
 			"mov\t%[rem], %[cx]\n\t"
@@ -114,7 +123,8 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			"jnz\tt2\n\t"
 			:
 			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (BIG_INT), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
+			  [ax] "a" ((uInt)0), [bx] "b" ((uInt)0),
+			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: noborrow
 	);
