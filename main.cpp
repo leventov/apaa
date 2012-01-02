@@ -26,7 +26,7 @@
 /*
  * Другие дефайны менять не стоит 
  */
-#define LOOP_BASE 100
+#define LOOP_BASE 200
 
 #define WS BigInt::WS
 #define TK 1000
@@ -38,7 +38,7 @@
 long long lpt() {
 	unsigned int t1h, t1l, t2h, t2l;
 	asm volatile ( "rdtsc\n" : "=a" (t1l), "=d" (t1h) );
-	for (int j = 0; j < TK; j++) asm volatile ( "" );
+	for (int j = 0; j < 2*TK; j++) asm volatile ( "" );
 	asm volatile ( "rdtsc\n" : "=a" (t2l), "=d" (t2h) );
 	
 	return ((unsigned int)-1)*(t2h - t1h) + t2l - t1l;
@@ -48,7 +48,7 @@ long long lpt() {
 int main() {
     unsigned int t1h, t1l, t2h, t2l;
     long long loop_time = lpt();
-     
+	printf("%lld\n", loop_time);
     long long rr[2];
 	long long r[NI]; 
     for (int k = 0; k <= 1; k++) {

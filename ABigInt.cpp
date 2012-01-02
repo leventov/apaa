@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include "BigInt.h"
 
-#define uInt unsigned long long int
+#define uInt unsigned int
 #define INIT_SIZE 1
 
 #define STR_EXPAND(tok) #tok		// http://www.guyrutenberg.com/2008/12/20/
 #define STR(tok) STR_EXPAND(tok)	// expanding-macros-into-string-constants-in-c/
 #define _WS STR(__WS)
-#define __WS 8
+#define __WS 4
 
 int BigInt::WS = __WS;
 
@@ -34,9 +34,8 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	//				rev 3.0
 	
 	// uInt		cycles per iteration, amd K10
-	// lli		2
-	// int		3
-	// really?
+	// int		2.0
+	// lli		3.0
 	asm goto (
 			"clc\n"
 			"o1:\t"

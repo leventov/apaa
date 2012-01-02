@@ -1,11 +1,11 @@
 CXX = g++
 # -O2 for asm preferable
 # -O1, -O2 or -O3 for cpp
-CXXFLAGS = -O3 
+CXXFLAGS = -O2 
 
 # cpp - OBigInt, NBigInt
 # asm - ABigInt, EABigInt
-BIR = NBigInt
+BIR = ABigInt
 
 main: main.o BI_c.o $(BIR).o
 	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt -lgmp
