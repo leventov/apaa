@@ -1,10 +1,10 @@
 CXX = g++
-CXXFLAGS = -O2
+CXXFLAGS = -O2  # -march=barcelona
 
 BIR = EABigInt
 
 main: main.o BI_c.o $(BIR).o
-	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt
+	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt -lgmp
 
 $(BIR).o: $(BIR).cpp BigInt.h
 	$(CXX) $(CXXFLAGS) -c $(BIR).cpp
