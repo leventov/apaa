@@ -37,7 +37,8 @@ const char *digits = "0123456789ABCDEF";
 char* BigInt::hex()
 {
 	int len = wc*WS;
-	char *r = (char*)calloc(len*2 + 1, 1), *r0 = r; // len in bytes => x2 hex digits; 0-terminator
+	// len in bytes => x2 hex digits; 0-terminator
+	char *r = (char*)calloc(len*2 + 1, 1), *r0 = r; 
 
 	uChar *w = (uChar*)words;
 	for (uChar *i = w + len - 1; i >= w; i--)

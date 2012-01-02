@@ -26,7 +26,10 @@ BigInt::BigInt(int v)
 	words = calloc(wc, WS);
 	*(uInt*)words = (uInt)v;
 }
-
+// 	gcc opt	cycles / iteration, amd K10
+// -01		7.5 
+// -02		5.0
+// -O3		5.0
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);

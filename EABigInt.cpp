@@ -32,8 +32,9 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	this->grow(rhs.wc);
 	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
 	int owc; // prevent cross initialization error
-	// 1.5 cycles / limb
-	// same as 4-iteration unroll in GMP
+	
+	// cycles per iteration, amd k10
+	// 3.0
 	asm goto (
 			"clc\n"
 			

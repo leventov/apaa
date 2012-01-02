@@ -1,106 +1,88 @@
-#include "BigInt.h"
+/*
+* ВЫВОД
+* Первое число - примерное количество тактов 
+* на итерацию сложения/вычитания (4, 8 или 16 байт)
+* Типичная погрешность 0,005. Типичная погрешность 
+* растет с уменьшением LOOP_BASE.
+* 
+* param - кол-во тактов, которое тратилось на вход и выход 
+* из методов сложения/вычитания. Для современных процессоров ожидается
+* результат 15 - 100 (если gcc оптимизируется хотя бы -O, 
+* без него меняются фреймы и может быть хоть 500). 
+* Если вывод другой, например отрицательный, 
+*"такты" тоже вряд ли близки к истине. В этом случае 
+* можно попробовать уменьшить LOOP_BASE. При этом LOOP_BASE
+* должен делиться на 4.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <algorithm>
 #include <functional>
-#include <gmp.h>
+#include "BigInt.h"
 
-int main1() {
-	BigInt *a = new BigInt(1);
-	BigInt *b = new BigInt(1);
-	BigInt * t;
-	for (int i = 0; i < 40; i++)
-	{
-		*a += *b;
-		t = a;
-		a = b;
-		b = t;
-		printf("%s %s\n", a->hex(), b->hex());
-	}
-	for (int i = 0; i < 40; i++)
-	{
-		*b -= *a;
-		t = a;
-		a = b;
-		b = t;
-		printf("%s %s\n", a->hex(), b->hex());
-	}
-	return 0;
+/*
+ * Другие дефайны менять не стоит 
+ */
+#define LOOP_BASE 100
+
+#define WS BigInt::WS
+#define TK 1000
+#define TOTAL_ITERATIONS (4 * LOOP_BASE * TK)
+#define IPL (TOTAL_ITERATIONS * 4.0 / WS)
+#define NI 50
+
+// Measure empty loop cycles
+long long lpt() {
+	unsigned int t1h, t1l, t2h, t2l;
+	asm volatile ( "rdtsc\n" : "=a" (t1l), "=d" (t1h) );
+	for (int j = 0; j < TK; j++) asm volatile ( "" );
+	asm volatile ( "rdtsc\n" : "=a" (t2l), "=d" (t2h) );
+	
+	return ((unsigned int)-1)*(t2h - t1h) + t2l - t1l;
 }
 
-int main2() {
-	BigInt a = BigInt(2, 8);
-	BigInt b = BigInt(5);
-	printf("%s %s\n", a.hex(), b.hex());
-	BigInt c = a - b;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	a -= BigInt::ZERO;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	b -= BigInt::ONE;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	c -= BigInt::ONE;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	a -= BigInt::ZERO;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	b -= BigInt::ZERO;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	c -= BigInt::ZERO;
-	printf("%s %s %s\n", a.hex(), b.hex(), c.hex());
-	return 0;
-}
-int TOTAL_ITERATIONS = 9830400;
 
 int main() {
-    struct timespec t1, t2;
-    int is = sizeof(int);
-    
-    double rr[3];
-    // 32 instead of BigInt::WS when measure GMP
-	double TID = TOTAL_ITERATIONS * is / BigInt::WS /* 32 */ *1.0L; 
- 	//printf("%d\n", s);
+    unsigned int t1h, t1l, t2h, t2l;
+    long long loop_time = lpt();
+     
+    long long rr[2];
+	long long r[NI]; 
+    for (int k = 0; k <= 1; k++) {
+		// s0 - number of 32bit limbs in bigints, 
+		// ss - number of realisation-specific words
+		int s0 = LOOP_BASE * (1 << k), s = s0 * 4 / WS;
 
-	int NI = 10;
-	double r[NI]; 
-    
-    for (int k = 0; k <= 2; k++) {
-		// s0 - number of int words int bigint sources, s - int realisation-specific words
-		int s0 = 96 * (1 << k), s = s0 * is / BigInt::WS;
-		//printf("%d %d\n", s, TOTAL_ITERATIONS / s0 / 2);
-		int* words = (int*)calloc(2*s0, is);
-		for (int* t = words; t < words + 2*s0; t++) *t = rand();
+		int* words = (int*)calloc(2*s0, 4);
+		for (int* t = words; t < words + 2*s0 - 1; t++) *t = rand();
 		BigInt *a = new BigInt(s, (void*)words);
 		BigInt *b = new BigInt(s, (void*)(words+s0));
-		//mpz_t ga, gb, gt;
-		//mpz_init2(ga, (s0+1)*32);
-		//mpz_init2(gb, (s0+1)*32);
-		//mpz_init2(gt, (s0+1)*32);
-		//mpz_set_str(ga, a->hex(), 16);
-		//mpz_set_str(gb, b->hex(), 16);
-		for (int i = 0; i < NI; i++) {
-			clock_gettime(CLOCK_MONOTONIC, &t1);
 
+		for (int i = 0; i < NI; i++) {
+			
+			asm volatile ( "rdtsc\n" : "=a" (t1l), "=d" (t1h) );
+			
 			for (int j = 0; j < TOTAL_ITERATIONS / s0 / 2; j++) {
-				//mpz_add(gt, ga, gb);
-				//mpz_sub(gt, ga, gb);
 				*a += *b;
 				*a -= *b;
 			}
 			
-			clock_gettime(CLOCK_MONOTONIC, &t2);
+			asm volatile ( "rdtsc\n" : "=a" (t2l), "=d" (t2h) );
 			
-			long long diff = 1000000000LL*(t2.tv_sec - t1.tv_sec) + t2.tv_nsec - t1.tv_nsec;
-			// print cpu clock ticks per addition of one 32 bit block of bigint words in plus/minus operation
-			r[i] = diff*3.2/TID;
-			// my cpu is 3.2 GHz
+			long long diff = ((unsigned int)-1)*(t2h - t1h) + t2l - t1l;
+			r[i] = diff ;
 		}
-		std::sort(r, r + NI, std::greater<double>());
+		std::sort(r, r + NI, std::greater<long long>());
 		std::reverse(r, r + NI);
-		//printf("\n");
 		rr[k] = r[0];
 	}
-	printf("%1.3f\n", rr[2] - (rr[0]-rr[1])*0.5);
+
+	printf(	"%1.3f, param = %lld\n", 
+			(2*rr[1] - rr[0] - loop_time)/IPL, 
+			(rr[0] - r[1])/TK/2);
     return 0;
 }
 

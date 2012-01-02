@@ -1,14 +1,13 @@
 #include <stdlib.h>
 #include "BigInt.h"
 
-#define uInt unsigned int
+#define uInt unsigned long long int
 #define INIT_SIZE 1
-#define BIG_INT (uInt)2000000000
 
 #define STR_EXPAND(tok) #tok		// http://www.guyrutenberg.com/2008/12/20/
 #define STR(tok) STR_EXPAND(tok)	// expanding-macros-into-string-constants-in-c/
 #define _WS STR(__WS)
-#define __WS 4
+#define __WS 8
 
 int BigInt::WS = __WS;
 
@@ -33,6 +32,11 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	int owc; // prevent cross initialization error
 
 	//				rev 3.0
+	
+	// uInt		cycles per iteration, amd K10
+	// lli		2
+	// int		3
+	// really?
 	asm goto (
 			"clc\n"
 			"o1:\t"
@@ -54,7 +58,7 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"jnc\t%l[nocarry]\n\t"
 			:
 			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (BIG_INT), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
+			  [ax] "a" ((uInt)0), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: nocarry
 	);
@@ -91,7 +95,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			"jnz\tt2\n\t"
 			:
 			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" (BIG_INT), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
+			  [ax] "a" ((uInt)0), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: noborrow
 	);

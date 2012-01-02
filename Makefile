@@ -1,7 +1,11 @@
 CXX = g++
-CXXFLAGS = -O2  # -march=barcelona
+# -O2 for asm preferable
+# -O1, -O2 or -O3 for cpp
+CXXFLAGS = -O3 
 
-BIR = EABigInt
+# cpp - OBigInt, NBigInt
+# asm - ABigInt, EABigInt
+BIR = NBigInt
 
 main: main.o BI_c.o $(BIR).o
 	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt -lgmp
@@ -12,8 +16,8 @@ $(BIR).o: $(BIR).cpp BigInt.h
 BI_c.o: BigInt_common.cpp BigInt.h
 	$(CXX) $(CXXFLAGS) -c -o BI_c.o BigInt_common.cpp
 
-
-A.s: $(BIR).cpp BigInt.h
-	$(CXX) $(CXXFLAGS) -o A.s -S $(BIR).cpp
+# too see assembly
+as: $(BIR).cpp BigInt.h
+	$(CXX) $(CXXFLAGS) -S $(BIR).cpp
 
 

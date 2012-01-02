@@ -20,8 +20,8 @@ public:
 
 	static int WS; //word size
 	
-	void* words;
 private:
+	void* words;
 	
 	int wc;
 

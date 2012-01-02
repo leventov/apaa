@@ -1,16 +1,11 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "BigInt.h"
 
-typedef signed int sInt;
-typedef signed long long sLong;
+typedef long long int sLong;
 typedef unsigned int uInt;
 typedef unsigned long long uLong;
 
 #define INIT_SIZE 2
-#define MAX_uInt ((uInt)(-1))
-#define MUL ((uLong)MAX_uInt) // MUL: Max_uInt in Unsigned Long
-#define SET MUL+1
 
 int BigInt::WS = sizeof(uInt);
 
@@ -28,6 +23,10 @@ BigInt::BigInt(int v)
 	*(uInt*)words = (uInt)v;
 }
 
+// gcc opt	cycles / iteration, amd K10
+// -01		3.75 
+// -02		3.25
+// -O3		2.87
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {	
 	this->grow(rhs.wc);
@@ -75,7 +74,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 		borrow -= *oz;
 		*th = borrow;
 		borrow = (sLong)borrow < 0 ? -1LL : 0;  
-		th++; oz++;	// WTF? все так просто?
+		th++; oz++;
 	}
 	while (borrow && th < thl)
 	{
