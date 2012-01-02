@@ -48,7 +48,7 @@ long long lpt() {
 int main() {
     unsigned int t1h, t1l, t2h, t2l;
     long long loop_time = lpt();
-	printf("%lld\n", loop_time);
+    
     long long rr[2];
 	long long r[NI]; 
     for (int k = 0; k <= 1; k++) {
