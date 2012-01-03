@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include "BigInt.h"
 
-#define uInt unsigned int
+#define uInt unsigned long long int
 #define INIT_SIZE 1
 
 #define STR_EXPAND(tok) #tok		// http://www.guyrutenberg.com/2008/12/20/
 #define STR(tok) STR_EXPAND(tok)	// expanding-macros-into-string-constants-in-c/
 #define _WS STR(__WS)
-#define __WS 4
+#define __WS 8
 
 int BigInt::WS = __WS;
 
@@ -28,19 +28,17 @@ BigInt::BigInt(int v)
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
-	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
 	int owc; // prevent cross initialization error
-
-	//				rev 3.0
 	
 	// uInt		cycles per iteration, amd K10
-	// int		2.0
-	// lli		3.0
+	// int		2.0-3.0 ??!
+	// lli		2.0-2.5 
 	asm goto (
 			"clc\n"
 			"o1:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
 			"adc\t%[ax], (%[th])\n\t"
+			
 			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"dec\t%[cx]\n\t"
@@ -56,8 +54,9 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"b1:\t"
 			"jnc\t%l[nocarry]\n\t"
 			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" ((uInt)0), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
+			: [th] "r" (words), [oz] "r" (rhs.words),
+			  [ax] "a" ((uInt)0), 
+			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: nocarry
 	);
@@ -72,14 +71,13 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 BigInt & BigInt::operator-=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
-	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
-	
-	//				rev 3.0
+
 	asm goto (
 			"clc\n"
 			"o2:\t"
 			"mov\t(%[oz]), %[ax]\n\t"
 			"sbb\t%[ax], (%[th])\n\t"
+			
 			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			"dec\t%[cx]\n\t"
@@ -93,8 +91,9 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			"dec\t%[cx]\n\t"
 			"jnz\tt2\n\t"
 			:
-			: [th] "r" (th), [oz] "r" (oz),
-			  [ax] "a" ((uInt)0), [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
+			: [th] "r" (words), [oz] "r" (rhs.words),
+			  [ax] "a" ((uInt)0), 
+			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
 			: noborrow
 	);

@@ -30,7 +30,6 @@ BigInt::BigInt(int v)
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
-	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
 	int owc; // prevent cross initialization error
 	
 	// cycles per iteration, amd k10
@@ -42,13 +41,11 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"mov\t(%[oz]), %[ax]\n\t"
 			"mov\t8(%[oz]), %[bx]\n\t"
 			
-			"lea\t" _WS "(%[oz]), %[oz]\n\t"
-			
 			"adc\t%[ax], (%[th])\n\t"
-			"adc\t%[bx], 8(%[th])\n\t"	
-				
-			"dec\t%[cx]\n\t"
+			"adc\t%[bx], 8(%[th])\n\t"
 			
+			"lea\t" _WS "(%[oz]), %[oz]\n\t"
+			"dec\t%[cx]\n\t"
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			
 			"jnz\to1\n\t"
@@ -71,7 +68,7 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"b1:\t"
 			"jnc\t%l[nocarry]\n\t"
 			:
-			: [th] "r" (th), [oz] "r" (oz),
+			: [th] "r" (words), [oz] "r" (rhs.words),
 			  [ax] "a" ((uInt)0), [bx] "b" ((uInt)0),
 			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
@@ -88,7 +85,6 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 BigInt & BigInt::operator-=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
-	uInt *th = (uInt*)words, *oz = (uInt*)rhs.words;
 	
 	asm goto (
 			"clc\n"
@@ -97,13 +93,11 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			"mov\t(%[oz]), %[ax]\n\t"
 			"mov\t8(%[oz]), %[bx]\n\t"
 			
-			"lea\t" _WS "(%[oz]), %[oz]\n\t"
-			
 			"sbb\t%[ax], (%[th])\n\t"
 			"sbb\t%[bx], 8(%[th])\n\t"
 			
+			"lea\t" _WS "(%[oz]), %[oz]\n\t"
 			"dec\t%[cx]\n\t"
-			
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			
 			"jnz\to2\n\t"
@@ -123,7 +117,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			
 			"jnz\tt2\n\t"
 			:
-			: [th] "r" (th), [oz] "r" (oz),
+			: [th] "r" (words), [oz] "r" (rhs.words),
 			  [ax] "a" ((uInt)0), [bx] "b" ((uInt)0),
 			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:

@@ -28,8 +28,8 @@ BigInt::BigInt(int v)
 }
 // 	gcc opt	cycles / iteration, amd K10
 // -01		7.5 
-// -02		5.0
-// -O3		5.0
+// -02		5.5
+// -O3		5.5
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
@@ -69,7 +69,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			uLong t = *th, r = oz < limit ? *oz : 0;
 			if (borrow)
 			{
-				if (t <= r) t += MUL; /* leave borrow set to 1 */
+				if (t <= r) t += MUL; // leave borrow set to 1
 				else
 				{
 					borrow = 0;

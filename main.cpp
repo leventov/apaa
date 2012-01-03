@@ -2,8 +2,6 @@
 * ВЫВОД
 * Первое число - примерное количество тактов 
 * на итерацию сложения/вычитания (4, 8 или 16 байт)
-* Типичная погрешность 0,005. Типичная погрешность 
-* растет с уменьшением LOOP_BASE.
 * 
 * param - кол-во тактов, которое тратилось на вход и выход 
 * из методов сложения/вычитания. Для современных процессоров ожидается
@@ -34,11 +32,11 @@
 #define IPL (TOTAL_ITERATIONS * 4.0 / WS)
 #define NI 50
 
-// Measure empty loop cycles
+// Measure timing
 long long lpt() {
 	unsigned int t1h, t1l, t2h, t2l;
 	asm volatile ( "rdtsc\n" : "=a" (t1l), "=d" (t1h) );
-	for (int j = 0; j < 2*TK; j++) asm volatile ( "" );
+	for (int i = 0; i < 2 * TK; i++) asm volatile ( "" );
 	asm volatile ( "rdtsc\n" : "=a" (t2l), "=d" (t2h) );
 	
 	return ((unsigned int)-1)*(t2h - t1h) + t2l - t1l;
@@ -47,7 +45,7 @@ long long lpt() {
 
 int main() {
     unsigned int t1h, t1l, t2h, t2l;
-    long long loop_time = lpt();
+    long long m_time = lpt();
     
     long long rr[2];
 	long long r[NI]; 
@@ -81,8 +79,8 @@ int main() {
 	}
 
 	printf(	"%1.3f, param = %lld\n", 
-			(2*rr[1] - rr[0] - loop_time)/IPL, 
-			(rr[0] - r[1])/TK/2);
+			( 2*rr[1] - rr[0] - m_time % 1000 ) / IPL, 
+			(rr[0] - r[1] - m_time + m_time % 1000) / TK / 2);
     return 0;
 }
 
