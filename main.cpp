@@ -74,8 +74,7 @@ int main() {
 			r[i] = diff ;
 		}
 		std::sort(r, r + NI, std::greater<long long>());
-		std::reverse(r, r + NI);
-		rr[k] = r[0];
+		rr[k] = r[NI - 1];
 	}
 
 	printf(	"%1.3f, param = %lld\n", 
