@@ -30,9 +30,8 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	this->grow(rhs.wc);
 	int owc; // prevent cross initialization error
 	
-	// uInt		cycles per iteration, amd K10
-	// int		2.0-3.0 ??!
-	// lli		2.0-2.5 
+	// cycles per iteration, amd K10
+	// 2.0
 	asm goto (
 			"clc\n"
 			"o1:\t"
