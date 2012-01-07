@@ -47,39 +47,45 @@ int main() {
     unsigned int t1h, t1l, t2h, t2l;
     long long m_time = lpt();
     
+    
     long long rr[2];
-	long long r[NI]; 
-    for (int k = 0; k <= 1; k++) {
-		// s0 - number of 32bit limbs in bigints, 
-		// ss - number of realisation-specific words
-		int s0 = LOOP_BASE * (1 << k), s = s0 * 4 / WS;
+	long long r[NI];
+	double rrr[5];
+	for (int i2 = 0; i2 < 5; i2++) { 
+		for (int k = 0; k <= 1; k++) {
+			// s0 - number of 32bit limbs in bigints, 
+			// ss - number of realisation-specific words
+			int s0 = LOOP_BASE * (1 << k), s = s0 * 4 / WS;
 
-		int* words = (int*)calloc(2*s0, 4);
-		for (int* t = words; t < words + 2*s0 - 1; t++) *t = rand();
-		BigInt *a = new BigInt(s, (void*)words);
-		BigInt *b = new BigInt(s, (void*)(words+s0));
+			int* words = (int*)calloc(2*s0, 4);
+			for (int* t = words; t < words + 2*s0 - 1; t++) *t = rand();
+			BigInt *a = new BigInt(s, (void*)words);
+			BigInt *b = new BigInt(s, (void*)(words+s0));
 
-		for (int i = 0; i < NI; i++) {
-			
-			asm volatile ( "rdtsc\n" : "=a" (t1l), "=d" (t1h) );
-			
-			for (int j = 0; j < TOTAL_ITERATIONS / s0 / 2; j++) {
-				*a += *b;
-				*a -= *b;
+			for (int i = 0; i < NI; i++) {
+				
+				asm volatile ( "rdtsc\n" : "=a" (t1l), "=d" (t1h) );
+				
+				for (int j = 0; j < TOTAL_ITERATIONS / s0 / 2; j++) {
+					*a += *b;
+					*a -= *b;
+				}
+				
+				asm volatile ( "rdtsc\n" : "=a" (t2l), "=d" (t2h) );
+				
+				long long diff = ((unsigned int)-1)*(t2h - t1h) + t2l - t1l;
+				r[i] = diff ;
 			}
-			
-			asm volatile ( "rdtsc\n" : "=a" (t2l), "=d" (t2h) );
-			
-			long long diff = ((unsigned int)-1)*(t2h - t1h) + t2l - t1l;
-			r[i] = diff ;
+			std::sort(r, r + NI, std::greater<long long>());
+			rr[k] = r[NI - 1];
 		}
-		std::sort(r, r + NI, std::greater<long long>());
-		rr[k] = r[NI - 1];
+		rrr[i2] = ( 2*rr[1] - rr[0] - m_time % 1000 ) / IPL;
 	}
-
-	printf(	"%1.3f, param = %lld\n", 
-			( 2*rr[1] - rr[0] - m_time % 1000 ) / IPL, 
-			(rr[0] - r[1] - m_time + m_time % 1000) / TK / 2);
+	std::sort(r, r + 5, std::greater<double>());
+	//printf(	"%1.3f\t",//, param = %lld\n", 
+	//		( 2*rr[1] - rr[0] - m_time % 1000 ) / IPL, 
+	//		(rr[0] - r[1] - m_time + m_time % 1000) / TK / 2);
+	printf("%1.3f\t", rrr[4]);
     return 0;
 }
 

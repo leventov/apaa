@@ -4,8 +4,8 @@ CXX = g++
 CXXFLAGS = -O3 
 
 # cpp - OBigInt, NBigInt
-# asm - ABigInt, EABigInt
-BIR = ABigInt
+# asm - ABigInt, EABigInt, GBigInt
+BIR = GBigInt
 
 main: main.o BI_c.o $(BIR).o
 	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt
