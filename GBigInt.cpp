@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include "BigInt.h"
+#include "Offsets.h"
 
 #define uInt unsigned long long int
 #define INIT_SIZE 1
 
 int BigInt::WS = 32;
-
+ 
 
 BigInt::BigInt(int init_size, int v)
 {
@@ -28,8 +29,8 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	int owc; // prevent cross initialization error
 	
 	// cycles per iteration, amd k10
-	// 5.88
-	asm goto (	
+	// 5.84
+	asm goto (	//	NOP_RPT
 			"clc\n" 
 			
 			"o1:\t"
@@ -99,7 +100,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
 	
-	asm goto (
+	asm goto (	//	NOP_RPT
 			"clc\n" 
 			
 			"o2:\t"
