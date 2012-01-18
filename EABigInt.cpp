@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "BigInt.h"
+#include "Offsets.h"
 
 #define uInt unsigned long long int
 #define INIT_SIZE 1
@@ -33,7 +34,7 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	int owc; // prevent cross initialization error
 	
 	// cycles per iteration, amd k10
-	// 3.0
+	// 3
 	asm goto (
 			"clc\n"
 			
@@ -49,6 +50,7 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			
 			"jnz\to1\n\t"
+			
 			
 			"mov\t%[rem], %[cx]\n\t"
 			"jecxz\tb1\n"
@@ -101,6 +103,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			"lea\t" _WS "(%[th]), %[th]\n\t"
 			
 			"jnz\to2\n\t"
+			
 			
 			"mov\t%[rem], %[cx]\n\t"
 			"jecxz\t%l[noborrow]\n"

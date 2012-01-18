@@ -27,9 +27,9 @@ BigInt::BigInt(int v)
 	*(uInt*)words = (uInt)v;
 }
 // 	gcc opt	cycles / iteration, amd K10
-// -01		7.5 
-// -02		5.5
-// -O3		5.5
+// -01		7 
+// -02		6
+// -O3		6
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);

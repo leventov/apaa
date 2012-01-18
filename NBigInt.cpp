@@ -24,9 +24,9 @@ BigInt::BigInt(int v)
 }
 
 // gcc opt	cycles / iteration, amd K10
-// -01		3.75 
-// -02		3.25
-// -O3		2.875
+// -01		3.5 
+// -02		3.0
+// -O3		3.0
 BigInt & BigInt::operator+=(const BigInt &rhs)
 {	
 	this->grow(rhs.wc);

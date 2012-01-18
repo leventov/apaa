@@ -29,11 +29,12 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 	int owc; // prevent cross initialization error
 	
 	// cycles per iteration, amd k10
-	// 5.84
-	asm goto (	//	NOP_RPT
+	// 6
+	asm goto (
 			"clc\n" 
 			
 			"o1:\t"
+			"lea\t32(%[oz]), %[oz]\n\t"
 			"mov\t(%[th]), %[r8]\n\t"
 			"mov\t8(%[th]), %[r9]\n\t"
 			"mov\t16(%[th]), %[r10]\n\t"
@@ -50,15 +51,17 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			
 			"mov\t%[r8], (%[th])\n\t"
 			"mov\t%[r9], 8(%[th])\n\t"
+			
 			"mov\t%[r10], 16(%[th])\n\t"
 			"mov\t%[r11], 24(%[th])\n\t"
 			
-			"lea\t32(%[oz]), %[oz]\n\t"
 			
-			"dec\t%[cx]\n\t"
+			
 			
 			"lea\t32(%[th]), %[th]\n\t"
+			"dec\t%[cx]\n\t"
 			
+
 			"jnz\to1\n\t"
 			
 			
@@ -82,7 +85,7 @@ BigInt & BigInt::operator+=(const BigInt &rhs)
 			"b1:\t"
 			"jnc\t%l[nocarry]\n\t"
 			:
-			: [th] "r" (words), [oz] "r" (rhs.words),
+			: [th] "r" (words), [oz] "r" (rhs.words-32),
 			  [r8] "r" (0LL), [r9] "r" (1LL), [r10] "r" (2LL), [r11] "r" (3LL),
 			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc)
 			:
@@ -100,10 +103,11 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 {
 	this->grow(rhs.wc);
 	
-	asm goto (	//	NOP_RPT
+	asm goto (
 			"clc\n" 
 			
 			"o2:\t"
+			"lea\t32(%[oz]), %[oz]\n\t"
 			"mov\t(%[th]), %[r8]\n\t"
 			"mov\t8(%[th]), %[r9]\n\t"
 			"mov\t16(%[th]), %[r10]\n\t"
@@ -120,14 +124,15 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			
 			"mov\t%[r8], (%[th])\n\t"
 			"mov\t%[r9], 8(%[th])\n\t"
+			
 			"mov\t%[r10], 16(%[th])\n\t"
 			"mov\t%[r11], 24(%[th])\n\t"
 			
-			"lea\t32(%[oz]), %[oz]\n\t"
 			
-			"dec\t%[cx]\n\t"
 			
 			"lea\t32(%[th]), %[th]\n\t"
+			"dec\t%[cx]\n\t"
+			
 			
 			"jnz\to2\n\t"
 			
@@ -149,7 +154,7 @@ BigInt & BigInt::operator-=(const BigInt &rhs)
 			
 			"jnz\tt2\n"
 			:
-			: [th] "r" (words), [oz] "r" (rhs.words),
+			: [th] "r" (words), [oz] "r" (rhs.words-32),
 			  [r8] "r" (0LL), [r9] "r" (1LL), [r10] "r" (2LL), [r11] "r" (3LL),
 			  [cx] "c" (rhs.wc), [rem] "r" (wc - rhs.wc) 
 			:

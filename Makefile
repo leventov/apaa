@@ -1,7 +1,7 @@
 CXX = g++
 # -O3 for asm preferable
 # -O1, -O2 or -O3 for cpp
-CXXFLAGS = -O3 
+CXXFLAGS = -O3 -Wno-pointer-arith
 
 # cpp - OBigInt, NBigInt
 # asm - ABigInt, EABigInt, GBigInt
