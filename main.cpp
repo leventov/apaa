@@ -44,26 +44,24 @@ int main() {
 	ull rr[2];
 	int s = LOOP_BASE*2;
 	void * s1 = malloc(s);
-	void * s2 = malloc(s);
-	//for (int j = 0; j < NI2; j++)
-		
-		for (int k = 1; k <= 2; k++) {
-			s = LOOP_BASE*k;
-			BigInt *a = new BigInt(s/WS, s1);
-			BigInt *b = new BigInt(s/WS, s2);
-			ull t1, t2;
-			ull r[NI];
-			for (int i = 0; i < NI; i++) {
-				t1 = rdtsc();
-				*a += *b;
-				t2 = rdtsc();
-				r[i] = t2 - t1;
-				
-			}
-			std::sort(r, r + NI, std::greater<ull>());
-			rr[k-1] = r[NI-1];
+	void * s2 = malloc(s);	
+	for (int k = 1; k <= 2; k++) {
+		s = LOOP_BASE*k;
+		BigInt *a = new BigInt(s/WS, s1);
+		BigInt *b = new BigInt(s/WS, s2);
+		ull t1, t2;
+		ull r[NI];
+		for (int i = 0; i < NI; i++) {
+			t1 = rdtsc();
+			*a += *b;
+			t2 = rdtsc();
+			r[i] = t2 - t1;
+			
 		}
-	printf("%1.3f\n", (rr[1]-rr[0])/IPL);
+		std::sort(r, r + NI, std::greater<ull>());
+		rr[k-1] = r[NI-1];
+	}
+	printf("%1.2\n", (rr[1]-rr[0])/IPL);
 }
 
 

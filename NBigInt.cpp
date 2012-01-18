@@ -24,7 +24,7 @@ BigInt::BigInt(int v)
 }
 
 // gcc opt	cycles / iteration, amd K10
-// -01		3.5 
+// -01		~3.66 
 // -02		3.0
 // -O3		3.0
 BigInt & BigInt::operator+=(const BigInt &rhs)
