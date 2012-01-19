@@ -5,7 +5,7 @@ CXXFLAGS = -O3 -Wno-pointer-arith
 
 # cpp - OBigInt, NBigInt
 # asm - ABigInt, EABigInt, GBigInt
-BIR = GBigInt
+BIR = EABigInt
 
 main: main.o BI_c.o $(BIR).o
 	$(CXX) $(CXXFLAGS) -o main BI_c.o $(BIR).o main.cpp -lrt
