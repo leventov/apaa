@@ -62,7 +62,11 @@ int main() {
 		std::sort(r, r + NI, std::greater<ull>());
 		rr[k-1] = r[NI-1];
 	}
+<<<<<<< HEAD
 	printf("%1.2f\n", (rr[1]-rr[0])/IPL/2);
+=======
+	printf("%1.2f\n", (rr[1]-rr[0])/IPL);
+>>>>>>> 5ff3cc7cad6a315f5ac0a77bd119118f4a71ac3c
 }
 
 
