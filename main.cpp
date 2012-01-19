@@ -54,6 +54,7 @@ int main() {
 		for (int i = 0; i < NI; i++) {
 			t1 = rdtsc();
 			*a += *b;
+			*a -= *b;
 			t2 = rdtsc();
 			r[i] = t2 - t1;
 			
@@ -61,7 +62,7 @@ int main() {
 		std::sort(r, r + NI, std::greater<ull>());
 		rr[k-1] = r[NI-1];
 	}
-	printf("%1.2\n", (rr[1]-rr[0])/IPL);
+	printf("%1.2f\n", (rr[1]-rr[0])/IPL/2);
 }
 
 
